@@ -5,3 +5,5 @@ Arduino implementation of EEZYbotARM.
 Steven Macías
 
 Yerick Ruiz
+
+Martín Diaz
