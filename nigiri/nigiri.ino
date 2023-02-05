@@ -138,24 +138,24 @@ void print_display_values() {
 
   // Show the values for X, Y, Z and G in the LCD Screen
 
-  lcd.setCursor(6, 0);
+  lcd.setCursor(4, 0);
   lcd.print("X:");
-  lcd.setCursor(8, 0);
+  lcd.setCursor(6, 0);
   lcd.print(servo_value_array[SERVO_X_ID]);
 
-  lcd.setCursor(12, 0);
+  lcd.setCursor(10, 0);
   lcd.print("Y:");
-  lcd.setCursor(14, 0);
+  lcd.setCursor(12, 0);
   lcd.print(servo_value_array[SERVO_Y_ID]);
 
-  lcd.setCursor(6, 1);
+  lcd.setCursor(4, 1);
   lcd.print("Z:");
-  lcd.setCursor(8, 1);
+  lcd.setCursor(6, 1);
   lcd.print(servo_value_array[SERVO_Z_ID]);
 
-  lcd.setCursor(12, 1);
+  lcd.setCursor(10, 1);
   lcd.print("G:");
-  lcd.setCursor(14, 1);
+  lcd.setCursor(12, 1);
   lcd.print(servo_value_array[SERVO_G_ID]);
 }
 
