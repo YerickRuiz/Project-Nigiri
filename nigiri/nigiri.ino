@@ -22,10 +22,111 @@
 #define SERVO_G_DEF 60
 #define SERVO_G_MAX 150
 
+#define btnRIGHT  0
+#define btnUP     1
+#define btnDOWN   2
+#define btnLEFT   3
+#define btnSELECT 4
+#define btnNONE   5
+
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 uint8_t selected_servo = SERVO_Z_ID;
 uint8_t servo_value_array[SERVO_MAX_IDS] = { SERVO_X_DEF, SERVO_Y_DEF, SERVO_Z_DEF, SERVO_G_DEF };
+uint8_t servo_max_array[SERVO_MAX_IDS] = { SERVO_X_MAX, SERVO_Y_MAX, SERVO_Z_MAX, SERVO_G_MAX};
+uint8_t servo_min_array[SERVO_MAX_IDS] = { SERVO_X_MIN, SERVO_Y_MIN, SERVO_Z_MIN, SERVO_G_MIN};
 char servo_char_array[SERVO_MAX_IDS] = { 'X', 'Y', 'Z', 'G' };
+
+int read_LCD_buttons()
+{
+ int adc_key_in = analogRead(0);      // read the value from the sensor 
+ // my buttons when read are centered at these valies: 0, 144, 329, 504, 741
+ // we add approx 50 to those values and check to see if we are close
+ if (adc_key_in > 1500) return btnNONE; // We make this the 1st option for speed reasons since it will be the most likely result
+ if (adc_key_in < 50)   return btnRIGHT;  
+ if (adc_key_in < 195)  return btnUP; 
+ if (adc_key_in < 380)  return btnDOWN; 
+ if (adc_key_in < 500)  return btnLEFT; 
+ if (adc_key_in < 700)  return btnSELECT;   
+ return btnNONE;  // when all others fail, return this...
+}
+
+void increment_selected_servo_value()
+{
+
+  if(servo_value_array[selected_servo] < servo_max_array[selected_servo]){
+
+    servo_value_array[selected_servo] +=1;
+  
+  }
+
+}
+
+void decrement_selected_servo_value(){
+
+  if(servo_value_array[selected_servo] > servo_min_array[selected_servo]){
+
+    servo_value_array[selected_servo] -=1;
+
+  }
+
+}
+
+void increment_selected_servo(){
+
+  if(selected_servo < (SERVO_MAX_IDS -1)){
+
+    selected_servo +=1;
+
+  }
+
+}
+
+void decrement_selected_servo(){
+
+  if(selected_servo > SERVO_X_ID){
+
+    selected_servo -=1;
+
+  }
+
+}
+
+void detect_buttons(){
+
+  int lcd_key = read_LCD_buttons();
+  switch (lcd_key)               // depending on which button was pushed, we perform an action
+ {
+   case btnRIGHT:
+     {
+     increment_selected_servo();
+     break;
+     }
+   case btnLEFT:
+     {
+     decrement_selected_servo();
+     break;
+     }
+   case btnUP:
+     {
+     increment_selected_servo_value();
+     break;
+     }
+   case btnDOWN:
+     {
+     decrement_selected_servo_value();
+     break;
+     }
+   case btnSELECT:
+     {
+     
+     break;
+     }
+     case btnNONE:
+     {
+     break;
+     }
+ }
+}
 
 void print_display_values() {
   lcd.clear();
@@ -69,5 +170,6 @@ void setup() {
 
 void loop() {
   print_display_values();
+  detect_buttons();
   delay(100);
 }
