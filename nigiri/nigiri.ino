@@ -2,9 +2,9 @@
 #include <LiquidCrystal.h>
 
 // PCA9685 values
-#define SERVOMIN 100  // This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX 500  // This is the 'maximum' pulse length count (out of 4096)
-#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates  
+#define SERVOMIN 100   // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX 500   // This is the 'maximum' pulse length count (out of 4096)
+#define SERVO_FREQ 50  // Analog servos run at ~50 Hz updates
 // Servo IDs
 #define SERVO_X_ID 0     // Servo Base
 #define SERVO_Y_ID 1     // Servo Reach
@@ -12,7 +12,7 @@
 #define SERVO_G_ID 3     // Servo Gripper
 #define SERVO_MAX_IDS 4  // Max number of servos
 // Servo Min, Max and Default Values
-#define SERVO_STEP 2
+#define SERVO_STEP 5
 #define SERVO_X_MIN 0
 #define SERVO_X_DEF 90
 #define SERVO_X_MAX 180
@@ -58,23 +58,27 @@ int read_LCD_buttons() {
   return btnNONE;  // when all others fail, return this...
 }
 
+void print_serial_servo_value() {
+  Serial.print(servo_char_array[selected_servo]);
+  Serial.print(":");
+  Serial.println(servo_value_array[selected_servo]);
+}
+
 void increment_selected_servo_value() {
 
-  if (servo_value_array[selected_servo] < servo_max_array[selected_servo]) {
+  if (servo_value_array[selected_servo] <= (servo_max_array[selected_servo] - SERVO_STEP)) {
 
     servo_value_array[selected_servo] += SERVO_STEP;
-    Serial.println(selected_servo);
-    Serial.println(servo_value_array[selected_servo]);
+    print_serial_servo_value();
   }
 }
 
 void decrement_selected_servo_value() {
 
-  if (servo_value_array[selected_servo] > servo_min_array[selected_servo]) {
+  if (servo_value_array[selected_servo] >= (servo_min_array[selected_servo] + SERVO_STEP)) {
 
     servo_value_array[selected_servo] -= SERVO_STEP;
-    Serial.println(selected_servo);
-    Serial.println(servo_value_array[selected_servo]);
+    print_serial_servo_value();
   }
 }
 
@@ -175,13 +179,12 @@ void setup() {
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
-  lcd.begin(16, 2);      // Configure LCD of 16 cols and 2 rows
-  lcd.clear();           // LCD screen clear
-  pinMode(10, OUTPUT);   // sets backlight pin-10 as PWM output
-  analogWrite(10, 125);  // Set backlight to 50% brightness
+  lcd.begin(16, 2);            // Configure LCD of 16 cols and 2 rows
+  lcd.clear();                 // LCD screen clear
+  pinMode(10, OUTPUT);         // sets backlight pin-10 as PWM output
+  analogWrite(10, 125);        // Set backlight to 50% brightness
   Serial.begin(9600);
   Serial.println("Project Nigiri");
-   
 }
 
 
