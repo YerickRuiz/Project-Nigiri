@@ -36,6 +36,8 @@
 #define btnSELECT 4
 #define btnNONE 5
 
+#define SEQ_DELAY 200
+
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -47,14 +49,15 @@ char servo_char_array[SERVO_MAX_IDS] = { 'X', 'Y', 'Z', 'G' };
 
 int read_LCD_buttons() {
   int adc_key_in = analogRead(0);  // read the value from the sensor
+  //Serial.println(adc_key_in);
   // my buttons when read are centered at these valies: 0, 144, 329, 504, 741
   // we add approx 50 to those values and check to see if we are close
-  if (adc_key_in > 1500) return btnNONE;  // We make this the 1st option for speed reasons since it will be the most likely result
+  if (adc_key_in > 1000) return btnNONE;  // We make this the 1st option for speed reasons since it will be the most likely result
   if (adc_key_in < 50) return btnRIGHT;
   if (adc_key_in < 195) return btnUP;
   if (adc_key_in < 380) return btnDOWN;
   if (adc_key_in < 500) return btnLEFT;
-  if (adc_key_in < 700) return btnSELECT;
+  if (adc_key_in < 750) return btnSELECT;
   return btnNONE;  // when all others fail, return this...
 }
 
@@ -62,6 +65,48 @@ void print_serial_servo_value() {
   Serial.print(servo_char_array[selected_servo]);
   Serial.print(":");
   Serial.println(servo_value_array[selected_servo]);
+}
+
+void push_select() {
+
+  Serial.println("you push the button select");
+  uint8_t array_size = 30;
+  uint8_t movements_x[array_size];
+  uint8_t movements_y[array_size];
+  uint8_t movements_z[array_size];
+  uint8_t movements_g[array_size];
+
+  generate_sweep_array(movements_x, array_size, SERVO_X_DEF, SERVO_X_MAX*0.8);
+  execute_movements(movements_x, array_size, SERVO_X_ID);
+  generate_sweep_array(movements_x, array_size, SERVO_X_MAX*0.8, SERVO_X_DEF);
+  execute_movements(movements_x, array_size, SERVO_X_ID);
+
+  generate_sweep_array(movements_y, array_size, SERVO_Y_DEF, SERVO_Y_MAX*0.8);
+  execute_movements(movements_y, array_size, SERVO_Y_ID);
+  generate_sweep_array(movements_y, array_size, SERVO_Y_MAX*0.8, SERVO_Y_DEF);
+  execute_movements(movements_y, array_size, SERVO_Y_ID);
+
+  generate_sweep_array(movements_z, array_size, SERVO_Z_DEF, SERVO_Z_MAX*0.8);
+  execute_movements(movements_z, array_size, SERVO_Z_ID);
+  generate_sweep_array(movements_z, array_size, SERVO_Z_MAX*0.8, SERVO_Z_DEF);
+  execute_movements(movements_z, array_size, SERVO_Z_ID);
+
+  generate_sweep_array(movements_g, array_size, SERVO_G_DEF, SERVO_G_MAX*0.8);
+  execute_movements(movements_g, array_size, SERVO_G_ID);
+  generate_sweep_array(movements_g, array_size, SERVO_X_MAX*0.8, SERVO_G_DEF);
+  execute_movements(movements_g, array_size, SERVO_G_ID);
+}
+
+void generate_sweep_array(uint8_t positions[], uint8_t size, uint8_t min_pos, uint8_t max_pos) {
+
+  int range = max_pos - min_pos;
+  int step = range / size;
+  int value = min_pos;
+
+  for (int i = 0; i < size; i++){
+    positions[i] = value;
+    value = value + step;
+  }
 }
 
 void increment_selected_servo_value() {
@@ -98,6 +143,14 @@ void decrement_selected_servo() {
   }
 }
 
+void execute_movements(uint8_t positions[], int size_array, int servo) {
+  for (int i = 0; i < size_array; i++) {
+    servo_value_array[servo] = positions[i];
+    delay(SEQ_DELAY);
+    apply_pwm_value();
+  }
+}
+
 void detect_buttons() {
 
   int lcd_key = read_LCD_buttons();
@@ -125,7 +178,7 @@ void detect_buttons() {
       }
     case btnSELECT:
       {
-
+        push_select();
         break;
       }
     case btnNONE:
@@ -186,7 +239,6 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Project Nigiri");
 }
-
 
 void loop() {
   print_display_values();
